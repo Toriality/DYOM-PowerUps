@@ -1,0 +1,18 @@
+jump @PU_TREASURE_END
+
+:PU_TREASURE
+    if
+        0214:   pickup 0@ picked_up  
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        if
+            0AF0: 0@ = read_int_from_ini_file 10@v section "PU_TREASURE" key "shakeAmount"
+        then
+            0003: shake_camera 0@
+        else
+            0003: shake_camera 200
+        end
+    end
+cleo_return 0
+
+:PU_TREASURE_END

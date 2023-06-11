@@ -1,0 +1,24 @@
+jump @PU_FUEL_END
+
+:PU_FUEL
+    if and
+        0214:   pickup 0@ picked_up
+        0449:   actor $PLAYER_ACTOR in_a_car
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        float 2@
+        float 3@
+        03C0: 0@ = actor $PLAYER_ACTOR car
+        02E3: 2@ = car 0@ speed
+        if
+            0AF2: 3@ = read_float_from_ini_file 10@v section "PU_FUEL" key "speed"
+        then
+            2@ *= 3@
+        else
+            2@ *= 3.0
+        end     
+        04BA: set_car_forward_speed 0@ forward_speed 2@
+    end
+cleo_return 0
+
+:PU_FUEL_END

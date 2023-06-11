@@ -1,0 +1,13 @@
+jump @PU_NITRO_END
+
+:PU_NITRO
+    if and
+        0214:   pickup 0@ picked_up
+        0449:   actor $PLAYER_ACTOR in_a_car 
+    then
+        03C0: 0@ = actor $PLAYER_ACTOR car
+        09E9: car 0@ add_single_nitro
+    end
+cleo_return 0
+
+:PU_NITRO_END

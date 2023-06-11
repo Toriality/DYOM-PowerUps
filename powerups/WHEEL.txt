@@ -1,0 +1,69 @@
+jump @PU_WHEEL_END
+
+:PU_WHEEL                           
+    if and
+        0214:   pickup 0@ picked_up
+        0449:   actor $PLAYER_ACTOR in_a_car
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        03C0: 0@ = actor $PLAYER_ACTOR car
+        0A30: repair_car 0@
+        if
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "extraCarHealth"
+        then
+            0224: set_car 0@ health_to 2500
+        end
+        if
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "curePlayer"
+        then
+            0223: set_actor $PLAYER_ACTOR health_to 250
+        end     
+        if
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "curePlayerAmour"
+        then
+             035F: actor $PLAYER_ACTOR armour += 100
+        end
+        if
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "cureGang"
+        then
+            046C: 1@ = car 0@ driver
+            if and
+                056D: actor 1@ defined
+                1@ > 0
+            then
+                0223: set_actor 1@ health_to 250
+            end
+            for 2@ = 0 to 2
+                0432: 1@ = get_actor_handle_from_car 0@ passenger_seat 2@
+                if and
+                    056D: actor 1@ defined
+                    1@ > 0
+                then
+                    0223: set_actor 1@ health_to 250
+                end
+            end 
+        end
+        if
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "cureGangExtra"
+        then
+            046C: 1@ = car 0@ driver
+            if and
+                056D:   actor 1@ defined
+                1@ > 0
+            then
+                0223: set_actor 1@ health_to 2500
+            end
+            for 2@ = 0 to 2
+                0432: 1@ = get_actor_handle_from_car 0@ passenger_seat 2@
+                if and
+                    056D:   actor 1@ defined
+                    1@ > 0
+                then
+                    0223: set_actor 1@ health_to 2500
+                end
+            end 
+        end
+    end
+cleo_return 0
+
+:PU_WHEEL_END

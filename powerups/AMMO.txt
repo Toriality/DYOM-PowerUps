@@ -1,0 +1,27 @@
+jump @PU_AMMO_END
+
+:PU_AMMO
+    if
+        0214:   pickup 0@ picked_up  
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        cleo_call @GIVE_PLAYER_AMMO 0
+        if and
+            0AF0: 3@ = read_int_from_ini_file 10@v section "PU_AMMO" key "persistGun"
+            0AF0: 4@ = read_int_from_ini_file 10@v section "PU_AMMO" key "persistAmmo"
+        then
+            0781: get_weapon_with_ID 3@ model_to 5@
+            0247: load_model 5@
+            038B: load_requested_models
+            01B2: give_actor $PLAYER_ACTOR weapon 3@ ammo 4@
+            0249: release_model 5@    
+        else 
+            0247: load_model 346
+            038B: load_requested_models
+            01B2: give_actor $PLAYER_ACTOR weapon 22 ammo 100
+            0249: release_model 346  
+        end
+    end
+cleo_return 0
+
+:PU_AMMO_END

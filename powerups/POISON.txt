@@ -1,0 +1,11 @@
+jump @PU_POISON_END
+
+:PU_POISON
+    if
+        0214:   pickup 0@ picked_up    
+    then
+        05BE: AS_actor $PLAYER_ACTOR die
+    end   
+cleo_return 0
+
+:PU_POISON_END

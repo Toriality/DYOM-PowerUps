@@ -1,0 +1,41 @@
+jump @PU_BULLETCHAR_END
+
+:PU_BULLETCHAR
+    if
+        0214:   pickup 0@ picked_up
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        0085: 1@ = timera
+        if
+            0AF0: 0@ = read_int_from_ini_file 10@v section "PU_BULLETCHAR" key "time"
+        then
+            1@ += 0@
+        else
+            1@ += 10000
+        end
+        if
+            0AF2: 0@ = read_float_from_ini_file 10@v section "PU_BULLETCHAR" key "fov"
+        then  
+            0922: set_camera_zoom_from 70.0 to 0@ timelimit 2000 smooth_transition 1     
+        else
+            0922: set_camera_zoom_from 70.0 to 100.0 timelimit 2000 smooth_transition 1
+        end
+        if
+            0AF2: 0@ = read_float_from_ini_file 10@v section "PU_BULLETCHAR" key "speed"
+        then  
+            015D: set_gamespeed 0@     
+        else
+            015D: set_gamespeed 0.5
+        end      
+        0931: lock_camera_zoom 1 
+    end
+    
+    if
+        001D:   timera > 1@  // (int)
+    then
+         0931: lock_camera_zoom 0
+         015D: set_gamespeed 1.0
+    end  
+cleo_return 1 1@
+
+:PU_BULLETCHAR_END

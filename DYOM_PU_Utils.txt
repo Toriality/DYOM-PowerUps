@@ -1,0 +1,137 @@
+jump @DYOM_PU_UTILS_END
+
+:GIVE_PLAYER_AMMO
+    // Only need to give ammo to one weapon of specific slot and any weapon of corresponding slot will receive it
+    // SLOT 2: PISTOLS
+    0114: set_actor $PLAYER_ACTOR weapon 22 add_ammo 100
+    // SLOT 3: SHOTGUNS
+    0114: set_actor $PLAYER_ACTOR weapon 25 add_ammo 100
+    // SLOT 4: SUB MACHINE-GUNS
+    0114: set_actor $PLAYER_ACTOR weapon 28 add_ammo 100
+    // SLOT 5: MACHINE-GUNS
+    0114: set_actor $PLAYER_ACTOR weapon 30 add_ammo 100
+    // SLOT 6: RIFLES
+    0114: set_actor $PLAYER_ACTOR weapon 33 add_ammo 100
+    // SLOT 7: HEAVY WEAPONS
+    0114: set_actor $PLAYER_ACTOR weapon 35 add_ammo 100
+    // SLOT 8: PROJECTILES
+    0114: set_actor $PLAYER_ACTOR weapon 16 add_ammo 100
+    // SLOT 9: SPECIAL 1
+    0114: set_actor $PLAYER_ACTOR weapon 42 add_ammo 100
+cleo_return 0
+
+
+{
+    RETURNS:
+        0: INI FILE PATH (16 bytes)
+}
+:GET_INI_FILE_PATH
+    string_format 0@v = string_format "%s" v$9905
+    0AC7: 4@ = var 0@ offset
+    4@ += 9 // skip to filename start
+    string_format 4@ = string_format "pu.ini"
+cleo_return 4 0@ 1@ 2@ 3@
+
+{   
+RETURNS:
+    0:  BITWISE VALUE
+}
+:GET_BITWISE_VALUE
+    cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+    0@ = 0
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useWheel"
+    then 08BD: set 0@ bit 0
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useFuel"
+    then 08BD: set 0@ bit 1
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useBeer"
+    then 08BD: set 0@ bit 2
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "usePoison"
+    then 08BD: set 0@ bit 3
+    end  
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useNitro"
+    then 08BD: set 0@ bit 4
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useBullet"
+    then 08BD: set 0@ bit 5
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useBulletChar"
+    then 08BD: set 0@ bit 6
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useTreasure"
+    then 08BD: set 0@ bit 7
+    end
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useAmmo"
+    then 08BD: set 0@ bit 8
+    end  
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useDriveByAmmo"
+    then 08BD: set 0@ bit 9
+    end  
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useTNT"
+    then 08BD: set 0@ bit 10
+    end 
+    if 0AF0: 1@ = read_int_from_ini_file 10@v section "POWER_UPS" key "useExplosive"
+    then 08BD: set 0@ bit 11
+    end 
+cleo_return 1 0@
+
+{
+0@ = RECEIVED MODEL
+1@ = INPUT MODEL
+2@ = RECEIVED PICKUP HANDLE
+3@ = INPUT PICKUP HANDLE
+4@ = PICKUP TYPE
+5@ = BITWISE INPUT
+6@ = BITWISE WANTED
+RETURNS:
+    0:  IF RECEIVED PICKUP MATCHES INPUT MODEL AND ISN'T ALREADY HANDLED:
+            RETURNS NEW PICKUP HANDLE
+        ELSE
+            RETURNS THE INPUT PICKUP HANDLE BACK
+}
+:SET_PICKUP_HANDLER
+    0B10: 5@ = 5@ AND 6@
+    if
+        0039:   5@ == 0
+    then
+        cleo_return 1 3@
+    end 
+     
+    if
+        003B:  0@ == 1@
+    then
+        if
+            003B: 2@ == 3@  // (int)
+        then 
+        else
+            065B: store_pickup 2@ position_to 5@ 6@ 7@
+            0215: destroy_pickup 2@
+            0247: load_model 1@                             
+            0213: 2@ = create_pickup 1@ type 4@ at 5@ 6@ 7@
+            0249: release_model 1@ 
+            cleo_return 1 2@
+        end 
+    end
+cleo_return 1 3@
+
+{
+0@ - COORD X
+1@ - COORD Y
+2@ - COORD Z
+RETURNS:
+    0: PICKUP HANDLE
+    1: OBJECT MODEL
+}
+:GET_NEAREST_PICKUP
+    if and
+        0AB1: cleo_call @GetPickupByCoords3D num_params 6 coords 0@ 1@ 2@ radius 3.0 only_valid TRUE find_after 0 store_to 3@
+        0AE3: 4@ = random_object_near_point 0@ 1@ 2@ in_radius 3.0 find_next 0    
+    then
+    0984: 4@ = object 4@ model
+        cleo_return 2 3@ 4@    
+    end
+cleo_return 2 0 0
+
+:DYOM_PU_UTILS_END

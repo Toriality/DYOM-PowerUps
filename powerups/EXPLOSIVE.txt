@@ -1,0 +1,25 @@
+jump @PU_EXPLOSIVE_END
+
+:PU_EXPLOSIVE
+    if and
+        0214:   pickup 0@ picked_up
+        0449:   actor $PLAYER_ACTOR in_a_car 
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        if
+            0AF0: 0@ = read_int_from_ini_file 10@v section "PU_EXPLOSIVE" key "instakill"
+        then
+            if
+                0@ == 1
+            then
+                03C0: 0@ = actor $PLAYER_ACTOR car
+                020B: explode_car 0@
+                cleo_return 0
+            end
+        end 
+        00A0: store_actor $PLAYER_ACTOR position_to 0@ 1@ 2@
+        0948: create_explosion_at 0@ 1@ 2@ type 0 camera_shake 1.0
+    end
+cleo_return 0
+
+:PU_EXPLOSIVE_END

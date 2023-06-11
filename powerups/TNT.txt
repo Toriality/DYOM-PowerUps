@@ -1,0 +1,36 @@
+jump @TNT_END
+
+:PU_TNT
+    if and
+        0214:   pickup 0@ picked_up
+        0449:   actor $PLAYER_ACTOR in_a_car 
+    then
+        cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
+        00A0: store_actor $PLAYER_ACTOR position_to 0@ 1@ 2@
+        if
+            0AE2: 3@ = random_vehicle_near_point 0@ 1@ 2@ in_radius 100.0 find_next false pass_wrecked false
+        then
+            repeat
+                if
+                    80DB: not actor $PLAYER_ACTOR in_car 3@
+                then
+                    if
+                        0AF0: 4@ = read_int_from_ini_file 10@v section "PU_TNT" key "forceExplode"
+                    then
+                        if
+                            4@ == 1
+                        then
+                            020B: explode_car 3@
+                            cleo_return 0
+                        end
+                    end
+                    00AA: store_car 3@ position_to 0@ 1@ 2@
+                    0948: create_explosion_at 0@ 1@ 2@ type 0 camera_shake 1.0
+                    break
+                end
+            until 8AE2: not 3@ = random_vehicle_near_point 0@ 1@ 2@ in_radius 100.0 find_next true pass_wrecked false
+        end    
+    end
+cleo_return 0
+
+:TNT_END

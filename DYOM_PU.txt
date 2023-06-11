@@ -1,0 +1,127 @@
+{$CLEO .cs}
+{$USE INI}
+{$USE BITWISE}
+{$NOSOURCE}
+0000: nop
+
+script_name "DYOM_PU"
+
+{$INCLUDE DYOM_PU_Utils.txt}
+{$INCLUDE powerups/AMMO.txt}
+{$INCLUDE powerups/BEER.txt}
+{$INCLUDE powerups/BULLET.txt}
+{$INCLUDE powerups/BULLETCHAR.txt}
+{$INCLUDE powerups/DRIVEBYAMMO.txt}
+{$INCLUDE powerups/EXPLOSIVE.txt}
+{$INCLUDE powerups/FUEL.txt}
+{$INCLUDE powerups/NITRO.txt}
+{$INCLUDE powerups/POISON.txt}
+{$INCLUDE powerups/TNT.txt}
+{$INCLUDE powerups/TREASURE.txt}
+{$INCLUDE powerups/WHEEL.txt}
+
+const
+    effectTime = 3@
+    hWheelPickup = 4@
+    hFuelPickup = 5@
+    hBeerPickup = 6@
+    hPoisonPickup = 7@
+    hNitroPickup = 8@
+    hBulletPickup = 9@
+    hBulletCharPickup = 10@
+    hTreasurePickup = 11@
+    hAmmoPickup = 12@
+    hDriveByAmmoPickup = 13@
+    hTNTPickup = 14@
+    hExplosivePickup = 15@
+    bitwiseValue = 16@
+    iniFilePath = 17@v
+
+    wheel_model = 1098
+    fuel_model = 1650
+    beer_model = 1484
+    poison_model = 2709
+    nitro_model = 2040
+    bullet_model = 2061
+    bulletchar_model = 1314
+    treasure_model = 1276
+    ammo_model = 2041
+    drivebyammo_model = 3016
+    tnt_model = 1252
+    explosive_model = 1225
+end
+
+var
+    effectTime: int = 0
+    hWheelPickup: int = -1
+    hFuelPickup: int = -1
+    hBeerPickup: int = -1
+    hPoisonPickup: int = -1
+    hNitroPickup: int = -1
+    hBulletPickup: int = -1
+    hBulletCharPickup: int = -1
+    hTreasurePickup: int = -1
+    hAmmoPickup: int = -1
+    hDriveByAmmoPickup: int = -1
+    hTNTPickup: int = -1
+    hExplosivePickup: int = -1
+    bitwiseValue: int = 0
+    iniFilePath: string
+end
+
+wait 2000
+                
+:PU_MAINLOOP
+while true
+    wait 100 ms
+    
+    if
+        $ONMISSION == 1
+    then
+        if
+            016B:   fading
+        then
+            cleo_call @GET_BITWISE_VALUE args 0 return_to bitwiseValue
+        end                                      
+
+        00A0: store_actor $PLAYER_ACTOR position_to 0@ 1@ 2@ 
+        if
+            cleo_call @GET_NEAREST_PICKUP 3 args 0@ 1@ 2@ return_to 0@ 1@
+        then
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ wheel_model         0@ hWheelPickup         14  bitwiseValue 1      returns_to hWheelPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ fuel_model          0@ hFuelPickup          14  bitwiseValue 2      returns_to hFuelPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ beer_model          0@ hBeerPickup          3   bitwiseValue 4      returns_to hBeerPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ poison_model        0@ hPoisonPickup        3   bitwiseValue 8      returns_to hPoisonPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ nitro_model         0@ hNitroPickup         14  bitwiseValue 16     returns_to hNitroPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ bullet_model        0@ hBulletPickup        14  bitwiseValue 32     returns_to hBulletPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ bulletchar_model    0@ hBulletCharPickup    3   bitwiseValue 64     returns_to hBulletCharPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ treasure_model      0@ hTreasurePickup      3   bitwiseValue 128    returns_to hTreasurePickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ ammo_model          0@ hAmmoPickup          3   bitwiseValue 256    returns_to hAmmoPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ drivebyammo_model   0@ hDriveByAmmoPickup   14  bitwiseValue 512    returns_to hDriveByAmmoPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ tnt_model           0@ hTNTPickup           14  bitwiseValue 1024   returns_to hTNTPickup
+            cleo_call @SET_PICKUP_HANDLER 7 args 1@ explosive_model     0@ hExplosivePickup     14  bitwiseValue 2048   returns_to hExplosivePickup
+        else
+            0@ = 0
+            1@ = 0       
+        end       
+                                                
+        cleo_call @PU_WHEEL         1 args hWheelPickup
+        cleo_call @PU_FUEL          1 args hFuelPickup          
+        cleo_call @PU_BEER          2 args hBeerPickup          effectTime returns_to effectTime
+        cleo_call @PU_POISON        1 args hPoisonPickup            
+        cleo_call @PU_NITRO         1 args hNitroPickup               
+        cleo_call @PU_BULLETCHAR    2 args hBulletCharPickup    effectTime returns_to effectTime
+        cleo_call @PU_BULLET        2 args hBulletPickup        effectTime returns_to effectTime
+        cleo_call @PU_TREASURE      1 args hTreasurePickup      
+        cleo_call @PU_AMMO          1 args hAmmoPickup          
+        cleo_call @PU_DRIVEBYAMMO   1 args hDriveByAmmoPickup   
+        cleo_call @PU_TNT           1 args hTNTPickup           
+        cleo_call @PU_EXPLOSIVE     1 args hExplosivePickup
+    end
+end
+return
+
+{$INCLUDE GetPickupByCoords3D.txt}       
+                  
+terminate_this_custom_script
+
