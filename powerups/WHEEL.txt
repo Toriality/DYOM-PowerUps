@@ -8,23 +8,27 @@ jump @PU_WHEEL_END
         cleo_call @GET_INI_FILE_PATH 0 returns_to 10@ 11@ 12@ 13@
         03C0: 0@ = actor $PLAYER_ACTOR car
         0A30: repair_car 0@
-        if
+        if and
             0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "extraCarHealth"
+            1@ == 1
         then
             0224: set_car 0@ health_to 2500
         end
-        if
+        if and
             0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "curePlayer"
+            1@ == 1
         then
             0223: set_actor $PLAYER_ACTOR health_to 250
         end     
-        if
-            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "curePlayerAmour"
+        if and
+            0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "curePlayerArmour"
+            1@ == 1
         then
              035F: actor $PLAYER_ACTOR armour += 100
         end
-        if
+        if and
             0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "cureGang"
+            1@ == 1
         then
             046C: 1@ = car 0@ driver
             if and
@@ -43,8 +47,9 @@ jump @PU_WHEEL_END
                 end
             end 
         end
-        if
+        if and
             0AF0: 1@ = read_int_from_ini_file 10@v section "PU_WHEEL" key "cureGangExtra"
+            1@ == 1
         then
             046C: 1@ = car 0@ driver
             if and

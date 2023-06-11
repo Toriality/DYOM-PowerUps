@@ -1,0 +1,96 @@
+{GetPickupByCoords3D.txt - A cleo function by OrionSR}
+{$USE bitwise}
+
+/*
+Function: Returns the handle of a pickup within the radius of a given location. 
+
+Usage:                  This is not a cleo script. This cleo function is included in and called by a cleo script.
+Caution:                  *** Do not try to compile GetPickupByCoords3D.txt or it will overwrite MAIN.SCM *** 
+                              Compilation should fail on the Cleo4 opcodes, so don't fix this non-issue. 
+
+Call Example:
+        if
+          0AB1: cleo_call @GetPickupByCoords3D num_params 6 coords 0@ 1@ 2@ radius 3.0 only_valid TRUE find_after 5@ store_to 5@
+        then
+          //...
+        end
+
+        {$INCLUDE GetPickupByCoords3D.txt} // include at end of calling script
+
+Parameters:
+        num_params 6          number of parameters passed, required by 0AB1: (don't change)
+        coords 0@ 1@ 2@       CVector, XYZ floats, will be rounded down to nearest 1/8th
+        radius 3.0            restrict search for pickups within this 3D float radius
+        only_valid TRUE       only return handles of valid pickups; pickups that are not type 0
+        find_after 5@         0 for start of pool, or resume search after the previous handle or index
+        store_to 5@           returns handle of 1st pickup matching parameters, or 0 if end of pool is reached
+
+IF and SET                    returns a logical FALSE if passed handle is out of range or nothing is found              
+*/
+
+
+:GetPickupByCoords3D
+
+// Round down float coords to nearest 1/8th to match the compressed coords used by pickups
+for 30@ = 0 to 2
+  0013: 0@(30@,3i) *= 8.0
+  0092: 0@(30@,3i) = float 0@(30@,3i) to_integer
+  0093: 0@(30@,3i) = integer 0@(30@,3i) to_float
+  0017: 0@(30@,3i) /= 8.0
+end
+
+// Find pickup pool parameters  {should be compatible with FLA}
+0A8D: 15@ = read_memory 0x457190 size 4 virtual_protect 0   //  maxPickupOpjects   620
+000E: 15@ -= 1                                              //  last usable index
+0A8D: 16@ = read_memory 0x48AE39 size 1 virtual_protect 0   //  CPickupObjectSize   0x20   
+0A8D: 17@ = read_memory 0x48ADC3 size 4 virtual_protect 0   //  pointer to pickup pool start   0x9788C0
+
+// Extract and increment index from previous handle (find_after)
+if
+  8039:   not 5@ == 0
+then
+  0B17: 5@ {&=} 0xFFFF // extract index from handle  {0B17's &= parsing should be fixed in next Sanny Builder update}
+  000A: 5@ += 1
+  if or
+    001B:   0 > 5@
+    001D:   5@ > 15@  
+  then
+    803B:   not 31@ == 31@  // logical FALSE 
+    0AB2: cleo_return 1 0
+  end
+end
+
+// Search the pickup pool for the next pickup within the radius
+
+for 18@ = 5@ to 15@
+  0085: 19@ = 18@        // read address = index
+  006A: 19@ *= 16@       // *= pickup size
+  005A: 19@ += 17@       // += pickup pool start
+  000A: 19@ += 0x1A      // += offset to m_wReferenceIndex
+  0A8D: 31@ = read_memory 19@ size 2 virtual_protect 0
+  000A: 19@ += 0x02      // += offset to PickupType
+  0A8D: 20@ = read_memory 19@ size 1 virtual_protect 0
+  0012: 31@ *= 0x10000   // shift m_wReferenceIndex to the upper word
+  005A: 31@ += 18@       // add the index to create a handle
+  065B: store_pickup 31@ position_to 26@ 27@ 28@
+  050A: 25@ = distance_between_XYZ 0@ 1@ 2@ and_XYZ 26@ 27@ 28@
+  if
+    0035:   3@ >= 25@ // if radius is >= distance_between points 
+  then
+    if
+      0039:   4@ == 1  // only_valid is true
+    then
+      if
+        8039:   not 20@ == 0  // valid if not type 0
+      then
+        003B:   31@ == 31@  // logical TRUE 
+        0AB2: cleo_return 1 31@ 
+      end
+    else  
+      003B:   31@ == 31@  // logical TRUE 
+      0AB2: cleo_return 1 31@ 
+    end
+  end 
+end
+803B:   not 31@ == 31@  // logical FALSE 
+0AB2: cleo_return 1 0 

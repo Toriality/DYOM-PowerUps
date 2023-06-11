@@ -19,8 +19,9 @@ jump @PU_DRIVEBYAMMO_END
             0A96: 0@ = ped $PLAYER_ACTOR struct
             0@ += 0x718
             0A8C: write_memory 0@ size 1 value 1@ virtual_protect 0
-            if
+            if and
                 0AF0: 0@ = read_int_from_ini_file 10@v section "PU_DRIVEBYAMMO" key "forceDriveBy"
+                0@ == 1
             then
                 0713: actor $PLAYER_ACTOR driveby_actor -1 car -1 point 0.0 0.0 0.0 radius 300.0 8 1 firing_rate 100
             end
@@ -32,8 +33,9 @@ jump @PU_DRIVEBYAMMO_END
             0A96: 0@ = ped $PLAYER_ACTOR struct
             0@ += 0x718
             0A8C: write_memory 0@ size 1 value 4 virtual_protect 0
-            if
+            if and
                 0AF0: 0@ = read_int_from_ini_file 10@v section "PU_DRIVEBYAMMO" key "forceDriveBy"
+                0@ == 1
             then
                 0713: actor $PLAYER_ACTOR driveby_actor -1 car -1 point 0.0 0.0 0.0 radius 300.0 8 1 firing_rate 100
             end
